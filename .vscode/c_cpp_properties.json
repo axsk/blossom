@@ -3,11 +3,11 @@
         {
             "name": "Win32",
             "includePath": [
-                "C:\\Users\\{env:USERNAME}\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\avr\\1.4.13\\**",
                 "C:\\Program Files (x86)\\Arduino\\tools\\**",
                 "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\**",
                 "${workspaceFolder}/**",
-                "C:\\Users\\{env:USERNAME}\\Documents\\Arduino\\libraries\\**"
+                "C:\\Users\\axsk\\Documents\\Arduino\\libraries\\**",
+                "C:\\Users\\axsk\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\avr\\1.4.13\\**"
             ],
             "defines": [
                 "_DEBUG",
