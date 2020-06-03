@@ -7,7 +7,7 @@
 
 #define MEMSIZE 128
 
-const unsigned long interval = 1000;
+const unsigned long interval = 7500;
 #define SAVEEVERY_START 1
 unsigned long saveevery = SAVEEVERY_START;
 
@@ -74,10 +74,10 @@ void requestdata() {
   } while ( Serial.available() );
   Serial.println();
 
-  Serial.print("interval (s)=");
-  Serial.println(interval);
-  printmem();
+  Serial.print("time=");
+  Serial.println(millis());
   Serial.println("-");
+  printmem();
 }
 
 void printmem() {
