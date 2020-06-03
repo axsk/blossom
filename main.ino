@@ -55,7 +55,7 @@ void loop() {
       if (memadr == MEMSIZE) {
         saveevery = saveevery * 2;
         for (int i = 0; i<MEMSIZE/2; i++) {
-          meas_mem[i] = meas_mem[i*2];
+          meas_mem[i] = compress(div(add(uncompress(meas_mem[i*2]), uncompress(meas_mem[i*2 + 1])),2));
         }
         memadr = MEMSIZE/2;
       }

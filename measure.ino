@@ -41,7 +41,7 @@ void print(measurement m) {
 
 measurement add(measurement m1, measurement m2) {
   return measurement {
-    m2.time,
+    m1.time + m2.time,
     m1.weight + m2.weight,
     m1.moisture + m2.moisture,
     m1.temp + m2.temp,
@@ -51,7 +51,7 @@ measurement add(measurement m1, measurement m2) {
 
 measurement div(measurement m, float by) {
   return measurement {
-    m.time, 
+    m.time / by,
     m.weight / by, 
     m.moisture / by, 
     m.temp / by, 
