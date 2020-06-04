@@ -7,8 +7,8 @@
 
 #define MEMSIZE 128
 
-const unsigned long interval = 7500;
-#define SAVEEVERY_START 1
+const unsigned long interval = 1000;
+#define SAVEEVERY_START 3
 unsigned long saveevery = SAVEEVERY_START;
 
 int memadr = 0;
@@ -43,8 +43,10 @@ void loop() {
     if (nmeas % saveevery == 0) {
 
       // compute the average
+      Serial.println("average");
+      
       meas_avg = div(meas_avg, saveevery);
-      // print(meas_avg);
+      print(meas_avg);
 
       // write to memory
       meas_mem[memadr] = compress(meas_avg);

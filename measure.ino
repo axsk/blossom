@@ -7,7 +7,7 @@ compressed compress(measurement m) {
   return compressed {
     m.time, // 45 days with 1 minute resolution
     m.weight - 50000,
-    m.moisture - 300,
+    (m.moisture - 330) * 4,
     m.temp - 15,
     //m.humidity * 100,
     (m.light < 128) ? m.light : 128 + m.light / 8 };
@@ -17,7 +17,7 @@ measurement uncompress(compressed m) {
   return measurement {
     m.time,
     (long) m.weight + 50000,
-    (long) m.moisture + 300,
+    (long) m.moisture / 4 + 330 ,
     (long) m.temp + 15,
     1,
     (m.light < 128) ? m.light : ((long) m.light - 128) * 8 };
@@ -29,7 +29,7 @@ void print(measurement m) {
   Serial.print(" weight=");
   Serial.print(m.weight);
   Serial.print(" moisture=");
-  Serial.print(m.moisture);
+  Serial.print((int)(m.moisture*10));
   Serial.print(" temp=");
   Serial.print(m.temp);
   Serial.print(" hum=");
@@ -60,11 +60,12 @@ measurement div(measurement m, float by) {
 }
 
 measurement measure() {
-  unsigned long time = millis();
+  weight.wait_ready_timeout(1000); // does this help?
   long w = weight.read() / 10;
   int  m = analogRead(MOISTURE_PIN);
   int  t = dht.readTemperature() * 10;
   int  h = dht.readHumidity() * 100;
-  int  l = analogRead(PHOTO_PIN);  
+  int  l = analogRead(PHOTO_PIN);
+  unsigned long time = millis();
   return measurement {time,w,m,t,h,l};
 }

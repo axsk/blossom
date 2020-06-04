@@ -22,7 +22,7 @@ function log(request=false, maxread = false)
                 write(p, ".")
             end
             while true
-                r = readuntil(p, '-', Inf)
+                @show r = readuntil(p, '-', Inf)
                 x = parseline(r)
                 println(x)
                 if (length(x) == 1) || !request# received the current time
@@ -48,7 +48,7 @@ function parseline(s)
     map(matches) do match
         if match.captures[2]  == "nan"
             0
-        else 
+        else
             parse(Int, match.captures[2])
         end
     end
