@@ -17,11 +17,11 @@ DHT dht(DHTPIN, DHTTYPE);
 
 struct measurement {
   unsigned long time;
-  long weight; // 2,147,483,647 / 60,000 =  30000
+  float weight; // 2,147,483,647 / 60,000 =  30000
   float moisture;
-  long temp;
-  long humidity;
-  long light;
+  float temp;
+  float humidity;
+  float light;
 };
 
 struct compressed {

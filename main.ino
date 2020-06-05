@@ -7,8 +7,8 @@
 
 #define MEMSIZE 128
 
-const unsigned long interval = 1000;
-#define SAVEEVERY_START 3
+const unsigned long interval = 7500;
+#define SAVEEVERY_START 1
 unsigned long saveevery = SAVEEVERY_START;
 
 int memadr = 0;
@@ -21,6 +21,7 @@ void setup() {
   Serial.begin(115200);
   pinMode(STATUS_LED, OUTPUT);
   setup_measurement();
+  Serial.println(interval + 500000);
   Serial.println("booted");
 }
 
@@ -43,7 +44,8 @@ void loop() {
     if (nmeas % saveevery == 0) {
 
       // compute the average
-      Serial.println("average");
+      Serial.print(saveevery);
+      Serial.print(" average: ");
       
       meas_avg = div(meas_avg, saveevery);
       print(meas_avg);
