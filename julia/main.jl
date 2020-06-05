@@ -79,7 +79,7 @@ module ard
         x = data[:,2:end]
         x = x .- minimum(x, dims=1)
         x = x ./ maximum(x, dims=1)
-        Plots.plot(t, x, labels=["weight" "dryness" "temp" "air" "light"], legend=:none)
+        Plots.plot(t, x, labels=["weight" "dryness" "temp" "air" "light"], legend=:outertopright)
     end
 
 
