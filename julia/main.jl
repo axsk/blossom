@@ -5,8 +5,15 @@ module ard
     using DelimitedFiles
     using Plots
 
-    export plot, request, readall, save, auto
+    export plot, request, readall, save, auto, process, smoothdata
 
+    Base.isless(d::DateTime, x::Number) = toseconds(d) < x
+    
+    todatetime(x::Number) =  Dates.epochms2datetime(x*1000)
+    toseconds(x::DateTime) = Dates.datetime2epochms(x) / 1000
+
+    todatetime(x::Array{T,2}) where T = hcat(todatetime.(x[:,1]), x[:,2:end])
+    
     nows() = round(Int, Dates.datetime2epochms(now()) / 1000)
 
     request(n=128) = log(request=true,maxread=n)
@@ -17,7 +24,7 @@ module ard
         try
             open("COM3", 115200) do p
                 if request
-                    write(p, ".")
+                    write(p,Char(1))
                 end
                 while true
                     r = readuntil(p, '-', Inf)
@@ -28,15 +35,18 @@ module ard
                     else
                         print(".")
                     end
+                    if occursin("average", r)
+                        continue
+                    end
                     #println(x)
                     if (length(x) == 1) || !request# received the current time
-                        offset = nows() - round(Int, x[1] / 1000)
+                        offset = nows() - round(Int, x[1])
                     end
                     if length(x) == 6
                         push!(data, x)
                         let data = data
                             data = hcat(data...)' |> collect
-                            data[:,1] = round.(Int, data[:,1] / 1000) .+ offset
+                            data[:,1] = round.(Int, data[:,1]) .+ offset
                             if liveplot
                                 plot(data) |> display
                             end
@@ -49,7 +59,7 @@ module ard
             isa(e, InterruptException) || rethrow(e)
         end
         data = hcat(data...)' |> collect
-        data[:,1] = round.(Int, data[:,1] / 1000) .+ offset
+        data[:,1] = round.(Int, data[:,1]) .+ offset
         data
     end
 
@@ -70,8 +80,7 @@ module ard
         writedlm("data/$t.csv", data)
     end
 
-    todatetime(x) = isa(x,DateTime) ? x : Dates.epochms2datetime(x*1000)
-    todatetime(x::Array{T,2}) where T = hcat(todatetime.(x[:,1]), x[:,2:end])
+
 
     function plot(data)
         data = data[sortperm(data[:,1]),:]
@@ -124,8 +133,8 @@ module ard
 
     function plotall()
         data = readall()
-        data = process(data)
-        data = smoothdata(data, 300)
+        data = process(data, Inf)
+        data = smoothdata(data, 60)
         p = ard.plot(data) |> display
         Plots.savefig("plot.png") 
         p
@@ -168,6 +177,10 @@ module ard
         s[:,5] .= 1 # fix for missing data
         s
     end
+
 end
 
 using .ard
+
+calibratedweight(w,t) = -53.5249 + 0.220758 * w - 1.40055 * t
+

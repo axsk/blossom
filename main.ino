@@ -1,18 +1,21 @@
-
 #include "HX711.h"
 #include "DHT.h"
 #include "measure.h"
+
+#include <avr/wdt.h>
 
 #define STATUS_LED 13
 
 #define MEMSIZE 128
 
-const unsigned long interval = 7500;
-#define SAVEEVERY_START 1
+const unsigned long interval = 1000;
+#define SAVEEVERY_START 5
 unsigned long saveevery = SAVEEVERY_START;
 
 int memadr = 0;
 unsigned long nmeas = 0;
+bool logmeas = true;
+bool logavg  = true;
 
 compressed meas_mem[MEMSIZE];
 measurement meas_avg = {0,0,0,0,0,0};
@@ -23,12 +26,31 @@ void setup() {
   setup_measurement();
   Serial.println(interval + 500000);
   Serial.println("booted");
+
+}
+void reset() {
+  wdt_enable(WDTO_15MS);
 }
 
 void loop() {
-  if (Serial.available()) {
-    requestdata();
-  }  
+  char lastchar = 255;
+  while (Serial.available()) {
+    lastchar = Serial.read();
+  }
+  switch (lastchar) {
+    case 0x00:
+      //reset();
+    case 1:
+      request();
+    case 2:
+      logmeas = false;
+    case 3:
+      logmeas = true;
+    case 4:
+      logavg = true;
+    case 5:
+      logavg = false;
+  }
 
   unsigned long time = millis();
 
@@ -38,21 +60,24 @@ void loop() {
     meas_avg = add(meas_avg, meas);
     nmeas++;
 
-    print(meas);
+    if (logmeas) {
+      print(meas);
+    }
 
     // write to memory
     if (nmeas % saveevery == 0) {
 
-      // compute the average
-      Serial.print(saveevery);
-      Serial.print(" average: ");
-      
       meas_avg = div(meas_avg, saveevery);
-      print(meas_avg);
+      // compute the average
+
+      if (logavg) { 
+        Serial.print(saveevery);
+        Serial.print(" average: ");
+        print(meas_avg);
+      }      
 
       // write to memory
       meas_mem[memadr] = compress(meas_avg);
-
       meas_avg = {0,0,0,0,0,0};
       memadr++;
 
@@ -69,17 +94,9 @@ void loop() {
   }
 }
 
-void requestdata() {
-  Serial.print("data requested ");
-  delay(10); //wait for data to arrive
-  do {
-    Serial.read();
-    Serial.print(".");
-  } while ( Serial.available() );
-  Serial.println();
-
+void request() {
   Serial.print("time=");
-  Serial.println(millis());
+  Serial.println(millis()/1000);
   Serial.println("-");
   printmem();
 }

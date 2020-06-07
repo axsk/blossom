@@ -7,7 +7,7 @@ compressed compress(measurement m) {
   return compressed {
     m.time, // 45 days with 1 minute resolution
     (m.weight - 500000) / 10,
-    (m.moisture - 340) * 4,
+    (m.moisture - 280) * 1.5, // min'max observed: 309 425
     (m.temp - 18) * 20,
     //m.humidity * 100,
     (m.light < 128) ? m.light : 128 + m.light / 8 };
@@ -17,7 +17,7 @@ measurement uncompress(compressed m) {
   return measurement {
     m.time,
     (float) m.weight * 10 + 500000,
-    (float) m.moisture / 4 + 340,
+    (float) m.moisture / 1.5 + 280,
     (float) m.temp / 20 + 18,
     1,
     (m.light < 128) ? m.light : ((float) m.light - 128) * 8 };
@@ -66,6 +66,6 @@ measurement measure() {
   float  t = dht.readTemperature();
   float  h = dht.readHumidity();
   int  l = analogRead(PHOTO_PIN);
-  unsigned long time = millis();
+  unsigned long time = millis() / 1000;
   return measurement {time,w,m,t,h,l};
 }
