@@ -14,6 +14,7 @@ unsigned long saveevery = SAVEEVERY_START;
 
 int memadr = 0;
 unsigned long nmeas = 0;
+unsigned int navg = 0;
 bool logmeas = true;
 bool logavg  = true;
 
@@ -48,8 +49,8 @@ void loop() {
       logmeas = true;
     case 4:
       logavg = true;
-    case 5:
-      logavg = false;
+    //case 5:
+      //logavg = false;
   }
 
   unsigned long time = millis();
@@ -59,6 +60,7 @@ void loop() {
     measurement meas = measure();
     meas_avg = add(meas_avg, meas);
     nmeas++;
+    navg++;
 
     if (logmeas) {
       print(meas);
@@ -67,8 +69,8 @@ void loop() {
     // write to memory
     if (nmeas % saveevery == 0) {
 
-      meas_avg = div(meas_avg, saveevery);
-      // compute the average
+      meas_avg = div(meas_avg, navg);
+      navg = 0;
 
       if (logavg) { 
         Serial.print(saveevery);
@@ -88,9 +90,10 @@ void loop() {
         }
         memadr = MEMSIZE/2;
       }
+
+      digitalWrite(STATUS_LED, HIGH); delay(10); 
+      digitalWrite(STATUS_LED, LOW);  delay(90);
     }
-    digitalWrite(STATUS_LED, HIGH); delay(10); 
-    digitalWrite(STATUS_LED, LOW);  delay(90);
   }
 }
 
