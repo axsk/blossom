@@ -184,3 +184,10 @@ using .ard
 
 calibratedweight(w,t) = -53.5249 + 0.220758 * w - 1.40055 * t
 
+function weightvariance(l)
+    d = l[:,2] |> diff
+    m = l[:,2] |> mean
+    @show std(d/m)
+    Plots.plot(d/m, ylims = (-0.0005, 0.0005)) |> display
+    Plots.plot(d/m |> sort, ylims = (-0.0005, 0.0005)) |> display
+end

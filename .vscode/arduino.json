@@ -1,7 +1,7 @@
 {
     "board": "adafruit:avr:protrinket5ftdi",
     "programmer": "AVRISP mkII",
-    "sketch": "main.ino",
+    "sketch": "arduino\\main.ino",
     "port": "COM3",
     "output": "../build"
 }

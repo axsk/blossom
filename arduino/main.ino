@@ -6,7 +6,7 @@
 
 #define STATUS_LED 13
 
-#define MEMSIZE 128
+#define MEMSIZE 80
 
 const unsigned long interval = 1000;
 #define SAVEEVERY_START 5
@@ -16,7 +16,7 @@ int memadr = 0;
 unsigned long nmeas = 0;
 unsigned int navg = 0;
 bool logmeas = true;
-bool logavg  = true;
+bool logavg  = false;
 
 compressed meas_mem[MEMSIZE];
 measurement meas_avg = {0,0,0,0,0,0};
@@ -25,7 +25,6 @@ void setup() {
   Serial.begin(115200);
   pinMode(STATUS_LED, OUTPUT);
   setup_measurement();
-  Serial.println(interval + 500000);
   Serial.println("booted");
 
 }

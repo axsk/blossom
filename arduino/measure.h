@@ -1,7 +1,5 @@
-#include "Arduino.h"
-
-#include "HX711.h"
-#include "DHT.h"
+#ifndef MEASURE_H
+#define MEASURE_H
 
 #define LOADCELL_DOUT_PIN 4
 #define LOADCELL_SCK_PIN 12
@@ -11,9 +9,6 @@
 
 #define MOISTURE_PIN A0
 #define PHOTO_PIN A2
-
-HX711 weight;
-DHT dht(DHTPIN, DHTTYPE);
 
 struct measurement {
   unsigned long time;
@@ -29,7 +24,7 @@ struct compressed {
   int weight;
   byte moisture;
   byte temp;
-  //#byte humidity;
+  byte humidity;
   byte light; 
 };
 
@@ -38,5 +33,7 @@ compressed compress(measurement);
 measurement uncompress(compressed);
 void print(measurement);
 measurement add(measurement, measurement);
-measurement mult(measurement, float);
+measurement div(measurement, unsigned int);
 measurement measure();
+
+#endif
