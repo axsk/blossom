@@ -16,7 +16,7 @@ module ard
     
     nows() = round(Int, Dates.datetime2epochms(now()) / 1000)
 
-    request(n=128) = log(request=true,maxread=n)
+    request(n=80) = log(request=true,maxread=n)
 
     function log(;request=false, maxread = false, liveplot=false, verbose=false) 
         data = []
@@ -42,7 +42,7 @@ module ard
                     if (length(x) == 1) || !request# received the current time
                         offset = nows() - round(Int, x[1])
                     end
-                    if length(x) == 6
+                    if length(x) == 7
                         push!(data, x)
                         let data = data
                             data = hcat(data...)' |> collect
@@ -88,17 +88,27 @@ module ard
         x = data[:,2:end]
         x = x .- minimum(x, dims=1)
         x = x ./ maximum(x, dims=1)
-        Plots.plot(t, x, labels=["weight" "dryness" "temp" "air" "light"], legend=:outertopright)
+        Plots.plot(t, x, labels=["weight" "dryness" "temp" "air" "pressure" "light"], legend=:outertopright)
     end
 
 
-    function readall(dir="data")
+    function readall(dir="data", maxlength = 160)
         dats = cd(dir) do
-            d=map(readdlm, readdir())
+            d=map(readdir()) do d
+                d = readdlm(d)
+                if size(d,2) == 6
+                    d = d[:, [1,2,3,4,5,6,6]]
+                    d[:,6] .= 0
+                end
+                d = sortslices(d, dims=1, lt=(x,y) -> x[1]<y[1])
+            end
         end
-
+        if maxlength > 0
+            dats = filter(x->@show(size(x, 1)) <= maxlength, dats)
+        end
+        length(dats)
         data = vcat(dats...)
-
+        #process(data)
     end
 
     function mergewithoutoverlap(d1, d2)
@@ -190,4 +200,9 @@ function weightvariance(l)
     @show std(d/m)
     Plots.plot(d/m, ylims = (-0.0005, 0.0005)) |> display
     Plots.plot(d/m |> sort, ylims = (-0.0005, 0.0005)) |> display
+end
+
+function cutwater(x)
+    inds = vcat(1, findall(x[2:end,2] .> x[1:end-1, 2] .+ 300) .+ 1, size(x,1) + 1)
+    xs = [x[inds[i]:inds[i+1]-1,:] for i in 1:length(inds)-1]
 end

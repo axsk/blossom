@@ -16,6 +16,7 @@ struct measurement {
   float moisture;
   float temp;
   float humidity;
+  float pressure;
   float light;
 };
 
@@ -25,7 +26,8 @@ struct compressed {
   byte moisture;
   byte temp;
   byte humidity;
-  byte light; 
+  byte pressure;
+  byte light;
 };
 
 void setup_measurement();

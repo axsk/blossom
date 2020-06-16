@@ -38,16 +38,16 @@ void loop() {
     lastchar = Serial.read();
   }
   switch (lastchar) {
-    case 0x00:
+    //case 0x00:
       //reset();
     case 1:
       request();
-    case 2:
-      logmeas = false;
-    case 3:
-      logmeas = true;
-    case 4:
-      logavg = true;
+    //case 2:
+    //  logmeas = false;
+    //case 3:
+    //  logmeas = true;
+    //case 4:
+    //  logavg = true;
     //case 5:
       //logavg = false;
   }

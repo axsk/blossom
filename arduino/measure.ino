@@ -33,6 +33,7 @@ compressed compress(measurement m) {
     (m.moisture - 250), // min'max observed: 277 425
     (m.temp - 18) * 20,
     m.humidity / 100 * 255,
+    (m.pressure - 100000) / 10,
     (m.light < 128) ? m.light : 128 + m.light / 8 };
 }
 
@@ -43,6 +44,7 @@ measurement uncompress(compressed m) {
     (float) m.moisture + 250,
     (float) m.temp / 20 + 18,
     (float) m.humidity / 255 * 100,
+    (float) m.pressure * 10 + 100000,
     (m.light < 128) ? m.light : ((float) m.light - 128) * 8 };
 }
 
@@ -57,6 +59,8 @@ void print(measurement m) {
   Serial.print(m.temp);
   Serial.print(" hum=");
   Serial.print(m.humidity);
+  Serial.print(" pressure=");
+  Serial.print(m.pressure);
   Serial.print(" light=");
   Serial.print(m.light);
   Serial.println("-");
@@ -69,6 +73,7 @@ measurement add(measurement m1, measurement m2) {
     m1.moisture + m2.moisture,
     m1.temp + m2.temp,
     m1.humidity + m2.humidity,
+    m1.pressure + m2.pressure,
     m1.light + m2.light};
 }
 
@@ -79,6 +84,7 @@ measurement div(measurement m, unsigned int by) {
     m.moisture / by,
     m.temp / by,
     m.humidity / by,
+    m.pressure / by,
     m.light / by};
 }
 
@@ -90,8 +96,9 @@ measurement measure() {
   int  l = analogRead(PHOTO_PIN);
   float t,h,pres;
   bme.read(pres, t, h);
+  Serial.println(pres);
   unsigned long time = millis() / 1000;
-  return measurement {time,w,m,t,h,l};
+  return measurement {time,w,m,t,h,pres,l};
 }
 
 
