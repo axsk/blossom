@@ -5,7 +5,7 @@ module ard
     using DelimitedFiles
     using Plots
 
-    export plot, request, readall, save, auto, process, smoothdata
+    export aplot, request, readall, save, auto, process, smoothdata
 
     Base.isless(d::DateTime, x::Number) = toseconds(d) < x
     
@@ -48,7 +48,7 @@ module ard
                             data = hcat(data...)' |> collect
                             data[:,1] = round.(Int, data[:,1]) .+ offset
                             if liveplot
-                                plot(data) |> display
+                                aplot(data) |> display
                             end
                         end
                     end
@@ -82,7 +82,7 @@ module ard
 
 
 
-    function plot(data)
+    function aplot(data)
         data = data[sortperm(data[:,1]),:]
         t = todatetime.(data[:,1])
         x = data[:,2:end]
@@ -92,7 +92,7 @@ module ard
     end
 
 
-    function readall(dir="data", maxlength = 160)
+    function readall(dir="data", maxlength = 160, proc=true)
         dats = cd(dir) do
             d=map(readdir()) do d
                 d = readdlm(d)
@@ -108,7 +108,10 @@ module ard
         end
         length(dats)
         data = vcat(dats...)
-        #process(data)
+        if proc
+            data=process(data)
+        end
+        data
     end
 
     function mergewithoutoverlap(d1, d2)
@@ -145,12 +148,12 @@ module ard
         data = readall()
         data = process(data, Inf)
         data = smoothdata(data, 60)
-        p = ard.plot(data) |> display
+        p = aplot(data) |> display
         Plots.savefig("plot.png") 
         p
     end
 
-    function process(d, maxdwdt=.5)
+    function process(d, maxdwdt=Inf)
         d = copy(d)
         n = size(d,1)
         #d = sortslices(d, dims=1)
@@ -159,17 +162,22 @@ module ard
             (d[i,2] > 10000) && (d[i,2] /= 10) # switched format
             (d[i,4] > 100) && (d[i,4] /= 10)
         end
-
-        for i=2:size(d,1)-1
-            if 1<i<n # outliers of hx711
-                dw = d[i,2] - d[i-1,2]
-                dt = d[i,1] - d[i-1,1]
-                if abs(dw) > maxdwdt * dt
-                    d[i,2] = d[i-1,2]
+        if maxdwdt < Inf
+            for i=2:size(d,1)-1
+                if 1<i<n # outliers of hx711
+                    dw = d[i,2] - d[i-1,2]
+                    dt = d[i,1] - d[i-1,1]
+                    if abs(dw) > maxdwdt * dt
+                        d[i,2] = d[i-1,2]
+                    end
                 end
             end
         end
         return d
+    end
+
+    function sortbytime(data)
+        data = sortslices(data, dims=1, lt=(x,y) -> x[1]<y[1])
     end
 
     function process_scale(d)
@@ -194,6 +202,9 @@ using .ard
 
 calibratedweight(w,t) = -53.5249 + 0.220758 * w - 1.40055 * t
 
+using Statistics
+using Plots
+
 function weightvariance(l)
     d = l[:,2] |> diff
     m = l[:,2] |> mean
@@ -202,7 +213,7 @@ function weightvariance(l)
     Plots.plot(d/m |> sort, ylims = (-0.0005, 0.0005)) |> display
 end
 
-function cutwater(x)
-    inds = vcat(1, findall(x[2:end,2] .> x[1:end-1, 2] .+ 300) .+ 1, size(x,1) + 1)
+function cutwater(x, dw=300)
+    inds = vcat(1, findall(x[2:end,2] .> x[1:end-1, 2] .+ dw) .+ 1, size(x,1) + 1)
     xs = [x[inds[i]:inds[i+1]-1,:] for i in 1:length(inds)-1]
 end

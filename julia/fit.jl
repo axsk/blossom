@@ -23,9 +23,9 @@ end
 
 using Optim
 
-function myloss(data)
+function myloss(data, cut=300)
     data = sortslices(data, dims=1, lt=(x,y) -> x[1]<y[1])
-    xs = cutwater(data)
+    xs = cutwater(data, cut)
     n = length(xs)
 
     tss = [x[:,1] for x in xs]
@@ -33,6 +33,7 @@ function myloss(data)
     ws = [x[:,2] for x in xs]
     
     dts = map(diff, tss)
+    ttotal = sum(sum.(dts))
 
     model(t, alpha, offset, shift, temp, tempscale) = exp(alpha * (t+shift)) + offset + tempscale * temp
 
@@ -57,10 +58,10 @@ function myloss(data)
                 loss += (ws[i][j] - f)^2 * dts[i][j]
             end
         end
-        loss
+        loss / ttotal
     end
 
-    x0 = vcat([-0.0144, 5710, -.126, 12.1 ],  [-450 for i in 1:n])
+    x0 = vcat([-0.0075, 5500, -1, 20 ],  [-850 for i in 1:n])
 
     @show opt = optimize(loss, x0, iterations=10000)
     @show p = opt.minimizer
@@ -71,13 +72,13 @@ function myloss(data)
     tempscale = p[4]
     shifts = p[5:end]
 
-    p = plot()
+    p = Plots.plot()
     for i in 1:n
         ts = tss[i]
         shift = shifts[i]
         temps = timeshift(ts, tempshift, xs[i][:,4])
         scatter!(ts .+ shift, ws[i], marker=:cross, alpha=0.5)
-        plot!(ts .+ shift, model.(ts, alpha, offset, shift, temps, tempscale), label="", color=:black)
+        Plots.plot!(ts .+ shift, model.(ts, alpha, offset, shift, temps, tempscale), label="", color=:black)
     end
     p
 
