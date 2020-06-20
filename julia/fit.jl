@@ -61,7 +61,7 @@ function myloss(data, cut=300)
         loss / ttotal
     end
 
-    x0 = vcat([-0.0075, 5500, -1, 20 ],  [-850 for i in 1:n])
+    x0 = vcat([-0.0075, 5500, -1, 20 ],  [-780 for i in 1:n])
 
     @show opt = optimize(loss, x0, iterations=10000)
     @show p = opt.minimizer
