@@ -23,9 +23,7 @@ end
 
 using Optim
 
-function myloss(data, cut=300)
-    data = sortslices(data, dims=1, lt=(x,y) -> x[1]<y[1])
-    xs = cutwater(data, cut)
+function myloss(xs::Vector)
     n = length(xs)
 
     tss = [x[:,1] for x in xs]
@@ -61,7 +59,7 @@ function myloss(data, cut=300)
         loss / ttotal
     end
 
-    x0 = vcat([-0.0075, 5500, -1, 20 ],  [-780 for i in 1:n])
+    x0 = vcat([-0.01, 5700, -.1, 10 ],  [-680 for i in 1:n])
 
     @show opt = optimize(loss, x0, iterations=10000)
     @show p = opt.minimizer

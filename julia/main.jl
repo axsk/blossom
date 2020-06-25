@@ -214,6 +214,76 @@ function weightvariance(l)
 end
 
 function cutwater(x, dw=300)
+    x = sortslices(x, dims=1, lt=(x,y) -> x[1]<y[1])
     inds = vcat(1, findall(x[2:end,2] .> x[1:end-1, 2] .+ dw) .+ 1, size(x,1) + 1)
     xs = [x[inds[i]:inds[i+1]-1,:] for i in 1:length(inds)-1]
 end
+
+sortbytime(x::AbstractArray) = sortslices(x, dims=1, lt=(x,y) -> x[1]<y[1])
+
+time(x::Array) = x[:,1]
+
+""" return the first entry whos time is bigger then the first entries + dt """
+function aftertime(x, start, dt)
+    tmin = x[start,1] + dt
+    for i = start+1:size(x, 1)
+        if x[i,1] > tmin
+            return i
+        end
+    end
+    return 0
+end
+
+function cutwater2(x, dt=120, dw=100)
+    x = sortbytime(x)
+    n = size(x, 1)
+    times = x[:,1]
+    start = 1
+    xs = []
+    for i=1:n
+        (i < start) && continue
+        wmin = x[i, 2] + dw
+        t1 = aftertime(x, i, dt)
+        if t1 == 0
+            push!(xs, x[start:end, :])
+            break
+        end
+        w1 = x[t1, 2]
+        w2 = x[aftertime(x, i, dt), 2] # check two times to skip outliers
+        if (w1 > wmin) && (w2 > wmin)
+            # found a watering event, now find its start
+            push!(xs, x[start:t1-1, :])
+            start = t1
+            @show length(xs[end])
+        end
+    end
+    return xs
+end
+                
+function outlierinds(x, dx)
+    n = size(x, 1)
+    inds = []
+    for i=2:n-1
+        d1 = x[i] - x[i-1] 
+        d2 = x[i] - x[i+1]
+        if (d1 * d2 > 0) && (abs(d1) > dx) && (abs(d2) > dx)
+            push!(inds, i)
+        end
+    end
+    inds
+end
+
+function killoutliers(x, dx)
+    x = copy(x)
+    inds = outlierinds(x[:,2], dx)
+    for i in inds
+        x[i,2] = (x[i-1,2] + x[i+1, 2]) / 2
+    end
+    x
+end
+
+function waterings(xs = ard.readall())
+    xs = killoutliers(xs, 10)
+    xs = cutwater2(xs, 360, 30)
+end
+
