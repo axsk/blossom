@@ -192,7 +192,6 @@ module ard
         k ./= sum(k, dims=2)
         x = d[:,2:end]
         s = hcat(ts, k*x)
-        s[:,5] .= 1 # fix for missing data
         s
     end
 
