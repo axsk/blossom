@@ -148,8 +148,8 @@ module ard
         data = readall()
         data = process(data, Inf)
         data = smoothdata(data, 60)
-        p = aplot(data) |> display
-        Plots.savefig("plot.png") 
+        p = aplot(data) 
+        #Plots.savefig("plot.png") 
         p
     end
 
