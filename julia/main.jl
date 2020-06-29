@@ -248,12 +248,12 @@ function cutwater2(x, dt=120, dw=100)
             break
         end
         w1 = x[t1, 2]
-        w2 = x[aftertime(x, i, dt), 2] # check two times to skip outliers
-        if (w1 > wmin) && (w2 > wmin)
+        #w2 = x[aftertime(x, i, dt), 2] # check two times to skip outliers
+        if (w1 > wmin) #&& (w2 > wmin)
             # found a watering event, now find its start
-            push!(xs, x[start:t1-1, :])
+            push!(xs, x[start:i, :])
             start = t1
-            @show length(xs[end])
+            #@show size(xs[end],1)
         end
     end
     return xs

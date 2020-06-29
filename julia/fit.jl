@@ -39,10 +39,11 @@ function myloss(xs::Vector)
         alpha = p[1]
         offset = p[2]
         tempshift = p[3]
-        #tempshift = 0
-        #tempshift = -.1
-        tempscale = p[4]
+        tempscale =  p[4]
         shifts = p[5:end]
+
+        #tempshift = -.35#
+        #tempscale =  5
 
         loss = 0.
         for i in 1:n
@@ -59,7 +60,7 @@ function myloss(xs::Vector)
         loss / ttotal
     end
 
-    x0 = vcat([-0.01, 5700, -.1, 10 ],  [-680 for i in 1:n])
+    x0 = vcat([-0.01, 5700, -.35, 6 ],  [-680 for i in 1:n])
 
     @show opt = optimize(loss, x0, iterations=10000)
     @show p = opt.minimizer
